@@ -4,19 +4,20 @@ import validator from "validator";
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
     minlength: 2,
     maxlength: 30,
+    default: "Jacques Cousteau",
   },
   about: {
     type: String,
-    required: true,
     minlength: 2,
     maxlength: 30,
+    default: "Explorador",
   },
   avatar: {
     type: String,
-    required: true,
+    default:
+      "https://practicum-content.s3.us-west-1.amazonaws.com/resources/moved_avatar_1604080799.jpg",
     validate: {
       validator: function (v) {
         const regex =
@@ -31,9 +32,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     validate: {
-      validator: function (v) {
-        return validator.isEmail(v);
-      },
+      validator: (v) => validator.isEmail(v),
       message: "Email no válido",
     },
   },

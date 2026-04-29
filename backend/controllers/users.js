@@ -1,9 +1,10 @@
+import bcrypt from "bcryptjs";
 import User from "../models/user.js";
 
 export const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => res.status(500).send({ message: "Error del servidor" }));
+    .catch(() => res.status(500).send({ message: "Error del servidor" }));
 };
 
 export const getUserById = (req, res) => {
@@ -19,16 +20,40 @@ export const getUserById = (req, res) => {
       if (err.name === "CastError") {
         return res.status(400).send({ message: "ID inválido" });
       }
-      res.status(500).send({ message: "Error del servidor" });
+      return res.status(500).send({ message: "Error del servidor" });
     });
 };
 
 export const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const { name, about, avatar, email, password } = req.body;
 
-  User.create({ name, about, avatar })
+  if (!password || !email) {
+    return res
+      .status(400)
+      .send({ message: "Email y contraseña son obligatorios" });
+  }
+
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => {
+      return User.create({
+        name,
+        about,
+        avatar: avatar || undefined,
+        email,
+        password: hash,
+      });
+    })
     .then((user) => res.status(201).send({ data: user }))
-    .catch((err) => res.status(400).send({ message: "Datos inválidos" }));
+    .catch((err) => {
+      if (err.code === 11000) {
+        return res.status(409).send({ message: "El email ya está registrado" });
+      }
+      if (err.name === "ValidationError") {
+        return res.status(400).send({ message: "Datos inválidos" });
+      }
+      return res.status(500).send({ message: "Error del servidor" });
+    });
 };
 
 export const updateProfile = (req, res) => {
@@ -48,7 +73,7 @@ export const updateProfile = (req, res) => {
       if (err.name === "ValidationError") {
         return res.status(400).send({ message: "Datos inválidos" });
       }
-      res.status(500).send({ message: "Error del servidor" });
+      return res.status(500).send({ message: "Error del servidor" });
     });
 };
 
@@ -69,6 +94,6 @@ export const updateAvatar = (req, res) => {
       if (err.name === "ValidationError") {
         return res.status(400).send({ message: "URL inválida" });
       }
-      res.status(500).send({ message: "Error del servidor" });
+      return res.status(500).send({ message: "Error del servidor" });
     });
 };
