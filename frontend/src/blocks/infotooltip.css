@@ -1,0 +1,26 @@
+.popup__content_type_tooltip {
+  max-width: 430px;
+  width: 100%;
+  text-align: center;
+  padding: 60px 36px;
+  box-sizing: border-box;
+}
+
+.popup__icon {
+  margin: 0 auto 50px;
+}
+
+.popup__icon-image {
+  width: 120px;
+  height: 120px;
+  display: block;
+  margin: 0 auto;
+}
+
+.popup__message {
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 29px;
+  color: #000;
+  margin: 0;
+}
