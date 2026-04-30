@@ -44,6 +44,18 @@ export const getUsers = (req, res) => {
     .catch(() => res.status(500).send({ message: "Error del servidor" }));
 };
 
+export const getMe = (req, res) => {
+  User.findById(req.user._id)
+    .orFail()
+    .then((user) => res.send({ data: user }))
+    .catch((err) => {
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(404).send({ message: "Usuario no encontrado" });
+      }
+      return res.status(500).send({ message: "Error del servidor" });
+    });
+};
+
 export const getUserById = (req, res) => {
   User.findById(req.params.userId)
     .orFail()
