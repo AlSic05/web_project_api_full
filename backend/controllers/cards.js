@@ -17,10 +17,18 @@ export const createCard = (req, res) => {
 };
 
 export const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .orFail()
     .then((card) => {
-      res.send({ data: card });
+      if (card.owner.toString() !== req.user._id) {
+        return res.status(403).send({
+          message: "No tienes permisos para eliminar esta tarjeta",
+        });
+      }
+
+      return Card.findByIdAndRemove(req.params.cardId).then((card) =>
+        res.send({ data: card }),
+      );
     })
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
