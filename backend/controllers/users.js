@@ -1,5 +1,42 @@
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "../models/user.js";
+
+const { JWT_SECRET = "dev-secret" } = process.env;
+
+export const login = (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).send({
+      message: "Email y contraseña requeridos",
+    });
+  }
+
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        return Promise.reject();
+      }
+
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          return Promise.reject();
+        }
+
+        const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+          expiresIn: "7d",
+        });
+
+        return res.send({ token });
+      });
+    })
+    .catch(() => {
+      return res.status(401).send({
+        message: "Email o contraseña incorrectos",
+      });
+    });
+};
 
 export const getUsers = (req, res) => {
   User.find({})
