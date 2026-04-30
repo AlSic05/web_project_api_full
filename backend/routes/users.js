@@ -1,13 +1,13 @@
 import express from "express";
-import { getUsers, getUserById, getMe } from "../controllers/users.js";
+import { getCards, createCard, deleteCard } from "../controllers/cards.js";
 import { auth } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-router.get("/users", auth, getUsers);
+router.get("/cards", auth, getCards);
 
-router.get("/users/me", auth, getMe);
+router.post("/cards", auth, createCard);
 
-router.get("/users/:userId", auth, getUserById);
+router.delete("/cards/:cardId", auth, deleteCard);
 
 export default router;
