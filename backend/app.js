@@ -12,13 +12,6 @@ const PORT = 3000;
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: "69d3d3bcaf75603d3792d4e1",
-  };
-  next();
-});
-
 app.post("/signin", login);
 app.post("/signup", createUser);
 
