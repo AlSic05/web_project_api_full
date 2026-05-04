@@ -5,6 +5,7 @@ import { login, createUser } from "./controllers/users.js";
 import userrouter from "./routes/users.js";
 import cardrouter from "./routes/cards.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
+import { requestLogger } from "./middlewares/logger.js";
 
 mongoose.connect("mongodb://localhost:27017/aroundb");
 
@@ -12,6 +13,15 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+
+app.use((req, res, next) => {
+  requestLogger.info({
+    method: req.method,
+    url: req.url,
+    date: new Date().toISOString(),
+  });
+  next();
+});
 
 app.post("/signin", login);
 app.post("/signup", createUser);

@@ -1,5 +1,12 @@
+import { errorLogger } from "./logger.js";
+
 export const errorHandler = (err, req, res, next) => {
-  console.error(err);
+  errorLogger.error({
+    message: err.message,
+    statusCode: err.statusCode || 500,
+    stack: err.stack,
+    date: new Date().toISOString(),
+  });
 
   const statusCode = err.statusCode || 500;
 
