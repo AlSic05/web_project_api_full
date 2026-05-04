@@ -30,3 +30,5 @@ router.delete(
   }),
   deleteCard,
 );
+
+export default router;
