@@ -4,25 +4,29 @@ import User from "../models/user.js";
 
 const { JWT_SECRET = "dev-secret" } = process.env;
 
-export const login = (req, res) => {
+export const login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).send({
-      message: "Email y contraseña requeridos",
-    });
+    const err = new Error("Email y contraseña requeridos");
+    err.statusCode = 400;
+    return next(err);
   }
 
   User.findOne({ email })
     .select("+password")
     .then((user) => {
       if (!user) {
-        return Promise.reject();
+        const err = new Error("Email o contraseña incorrectos");
+        err.statusCode = 401;
+        throw err;
       }
 
       return bcrypt.compare(password, user.password).then((matched) => {
         if (!matched) {
-          return Promise.reject();
+          const err = new Error("Email o contraseña incorrectos");
+          err.statusCode = 401;
+          throw err;
         }
 
         const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
@@ -32,32 +36,30 @@ export const login = (req, res) => {
         return res.send({ token });
       });
     })
-    .catch(() => {
-      return res.status(401).send({
-        message: "Email o contraseña incorrectos",
-      });
-    });
+    .catch(next);
 };
 
-export const getUsers = (req, res) => {
+export const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(500).send({ message: "Error del servidor" }));
+    .catch(next);
 };
 
-export const getMe = (req, res) => {
+export const getMe = (req, res, next) => {
   User.findById(req.user._id)
     .orFail()
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "Usuario no encontrado" });
+        err.statusCode = 404;
+      } else if (err.name === "CastError") {
+        err.statusCode = 400;
       }
-      return res.status(500).send({ message: "Error del servidor" });
+      next(err);
     });
 };
 
-export const getUserById = (req, res) => {
+export const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail()
     .then((user) => {
@@ -65,48 +67,46 @@ export const getUserById = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "Usuario no encontrado" });
+        err.statusCode = 404;
+      } else if (err.name === "CastError") {
+        err.statusCode = 400;
       }
-      if (err.name === "CastError") {
-        return res.status(400).send({ message: "ID inválido" });
-      }
-      return res.status(500).send({ message: "Error del servidor" });
+      next(err);
     });
 };
 
-export const createUser = (req, res) => {
+export const createUser = (req, res, next) => {
   const { name, about, avatar, email, password } = req.body;
 
   if (!password || !email) {
-    return res
-      .status(400)
-      .send({ message: "Email y contraseña son obligatorios" });
+    const err = new Error("Email y contraseña son obligatorios");
+    err.statusCode = 400;
+    return next(err);
   }
 
   bcrypt
     .hash(password, 10)
-    .then((hash) => {
-      return User.create({
+    .then((hash) =>
+      User.create({
         name,
         about,
         avatar: avatar || undefined,
         email,
         password: hash,
-      });
-    })
+      }),
+    )
     .then((user) => res.status(201).send({ data: user }))
     .catch((err) => {
       if (err.code === 11000) {
-        return res.status(409).send({ message: "El email ya está registrado" });
+        err.statusCode = 409;
+      } else if (err.name === "ValidationError") {
+        err.statusCode = 400;
       }
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: "Datos inválidos" });
-      }
-      return res.status(500).send({ message: "Error del servidor" });
+      next(err);
     });
 };
 
-export const updateProfile = (req, res) => {
+export const updateProfile = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(
@@ -118,16 +118,15 @@ export const updateProfile = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "Usuario no encontrado" });
+        err.statusCode = 404;
+      } else if (err.name === "ValidationError") {
+        err.statusCode = 400;
       }
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: "Datos inválidos" });
-      }
-      return res.status(500).send({ message: "Error del servidor" });
+      next(err);
     });
 };
 
-export const updateAvatar = (req, res) => {
+export const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -139,11 +138,10 @@ export const updateAvatar = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "Usuario no encontrado" });
+        err.statusCode = 404;
+      } else if (err.name === "ValidationError") {
+        err.statusCode = 400;
       }
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: "URL inválida" });
-      }
-      return res.status(500).send({ message: "Error del servidor" });
+      next(err);
     });
 };

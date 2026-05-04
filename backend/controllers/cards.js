@@ -1,47 +1,47 @@
 import Card from "../models/card.js";
 
-export const getCards = (req, res) => {
+export const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch((err) => res.status(500).send({ message: "Error del servidor" }));
+    .catch(next);
 };
 
-export const createCard = (req, res) => {
-  console.log(req.user._id);
+export const createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
 
   Card.create({ name, link, owner })
     .then((card) => res.status(201).send({ data: card }))
-    .catch((err) => res.status(400).send({ message: "Datos inválidos" }));
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        err.statusCode = 400;
+      }
+      next(err);
+    });
 };
 
-export const deleteCard = (req, res) => {
+export const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .orFail()
     .then((card) => {
       if (card.owner.toString() !== req.user._id) {
-        return res.status(403).send({
-          message: "No tienes permisos para eliminar esta tarjeta",
-        });
+        const err = new Error("No tienes permisos para eliminar esta tarjeta");
+        err.statusCode = 403;
+        throw err;
       }
 
-      return Card.findByIdAndRemove(req.params.cardId).then((card) =>
-        res.send({ data: card }),
-      );
+      return Card.findByIdAndRemove(req.params.cardId);
     })
+    .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "Tarjeta no encontrada" });
-      }
-      if (err.name === "CastError") {
-        return res.status(400).send({ message: "ID inválido" });
-      }
-      res.status(500).send({ message: "Error del servidor" });
+      if (err.name === "DocumentNotFoundError") err.statusCode = 404;
+      else if (err.name === "CastError") err.statusCode = 400;
+
+      next(err);
     });
 };
 
-export const likeCard = (req, res) => {
+export const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -51,30 +51,30 @@ export const likeCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "Tarjeta no encontrada" });
+        err.statusCode = 404;
+      } else if (err.name === "CastError") {
+        err.statusCode = 400;
       }
-      if (err.name === "CastError") {
-        return res.status(400).send({ message: "ID inválido" });
-      }
-      res.status(500).send({ message: "Error del servidor" });
+
+      next(err);
     });
 };
 
-export const dislikeCard = (req, res) => {
+export const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $pull: { likes: req.user._id } }, // elimina _id del array
+    { $pull: { likes: req.user._id } },
     { new: true },
   )
     .orFail()
-    .then((card) => {
-      if (!card)
-        return res.status(404).send({ message: "Tarjeta no encontrada" });
-      res.send({ data: card });
-    })
+    .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === "CastError")
-        return res.status(400).send({ message: "ID inválido" });
-      res.status(500).send({ message: "Error del servidor" });
+      if (err.name === "DocumentNotFoundError") {
+        err.statusCode = 404;
+      } else if (err.name === "CastError") {
+        err.statusCode = 400;
+      }
+
+      next(err);
     });
 };
