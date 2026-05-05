@@ -6,11 +6,15 @@ import userrouter from "./routes/users.js";
 import cardrouter from "./routes/cards.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { requestLogger } from "./middlewares/logger.js";
+import cors from "cors";
 
 mongoose.connect("mongodb://localhost:27017/aroundb");
 
 const app = express();
 const PORT = 3000;
+
+app.use(cors());
+app.options("*", cors());
 
 app.use(express.json());
 
