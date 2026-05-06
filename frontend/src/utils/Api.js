@@ -45,6 +45,8 @@ class Api {
     }).then(this._checkResponse);
   }
 
+  // --- MÉTODOS DE LIKES ---
+
   addLike(cardId) {
     return fetch(`${this._baseUrl}/cards/${cardId}/likes`, {
       method: "PUT",
@@ -57,6 +59,10 @@ class Api {
       method: "DELETE",
       headers: this._getHeaders(),
     }).then(this._checkResponse);
+  }
+
+  changeLikeCardStatus(cardId, isLiked) {
+    return isLiked ? this.removeLike(cardId) : this.addLike(cardId);
   }
 
   deleteCard(cardId) {
@@ -78,4 +84,5 @@ class Api {
 const api = new Api({
   baseUrl: "https://api.yasa.chickenkiller.com",
 });
+
 export default api;

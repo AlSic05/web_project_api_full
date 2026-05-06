@@ -29,14 +29,12 @@ export const deleteCard = (req, res, next) => {
         err.statusCode = 403;
         throw err;
       }
-
-      return Card.findByIdAndRemove(req.params.cardId);
+      return Card.findByIdAndDelete(req.params.cardId);
     })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") err.statusCode = 404;
       else if (err.name === "CastError") err.statusCode = 400;
-
       next(err);
     });
 };
