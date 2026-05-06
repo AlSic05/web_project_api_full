@@ -8,7 +8,7 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 import { requestLogger } from "./middlewares/logger.js";
 import cors from "cors";
 
-mongoose.connect("mongodb://localhost:27017/aroundb");
+mongoose.connect("mongodb://127.0.0.1:27017/aroundb");
 
 const app = express();
 const PORT = 3000;
