@@ -125,19 +125,17 @@ function App() {
       })
       .catch(console.error);
   };
+
   useEffect(() => {
     api
       .getInitialCards()
       .then((res) => {
-        const initialCards = res.data || res;
+        const cardsArray = res.data || res;
 
-        if (Array.isArray(initialCards)) {
-          setCards(initialCards);
+        if (Array.isArray(cardsArray)) {
+          setCards(cardsArray);
         } else {
-          console.error(
-            "La respuesta de tarjetas no es un array:",
-            initialCards,
-          );
+          console.error("Lo que llegó no es un array:", cardsArray);
         }
       })
       .catch(console.error);
