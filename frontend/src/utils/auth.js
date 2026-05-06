@@ -1,4 +1,4 @@
-const BASE_URL = "https://yasa.chickenkiller.com";
+const BASE_URL = "https://api.yasa.chickenkiller.com";
 
 function checkResponse(res) {
   if (res.ok) return res.json();

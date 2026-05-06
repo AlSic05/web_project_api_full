@@ -76,7 +76,6 @@ class Api {
 }
 
 const api = new Api({
-  baseUrl: "https://yasa.chickenkiller.com",
+  baseUrl: "https://api.yasa.chickenkiller.com",
 });
-
 export default api;
