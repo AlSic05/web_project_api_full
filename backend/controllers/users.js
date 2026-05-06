@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "../models/user.js";
 
-const { JWT_SECRET = "dev-secret" } = process.env;
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 export const login = (req, res, next) => {
   const { email, password } = req.body;
