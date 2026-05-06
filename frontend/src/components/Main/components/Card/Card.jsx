@@ -11,7 +11,12 @@ export default function Card({
 
   const { name, link, likes } = card;
 
-  const isLiked = likes?.some((like) => like._id === currentUser?._id) ?? false;
+  const isLiked =
+    likes?.some((id) =>
+      typeof id === "string"
+        ? id === currentUser?._id
+        : id._id === currentUser?._id,
+    ) ?? false;
 
   const cardLikeButtonClassName = `card__like-button ${
     isLiked ? "card__like-button_is-active" : ""

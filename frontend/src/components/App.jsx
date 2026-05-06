@@ -142,14 +142,15 @@ function App() {
   }, []);
 
   async function handleCardLike(card) {
-    const isLiked = card.isLiked;
+    const isLiked = card.likes.some((id) => id === currentUser._id);
 
     try {
-      const newCard = await api.changeLikeCardStatus(card._id, !isLiked);
+      const res = await api.changeLikeCardStatus(card._id, isLiked);
 
+      const newCard = res.data || res;
       setCards((state) => state.map((c) => (c._id === card._id ? newCard : c)));
     } catch (error) {
-      console.error(error);
+      console.error("Error al dar like:", error);
     }
   }
 
