@@ -95,36 +95,36 @@ function App() {
     setPopup(null);
   }
 
-  const handleUpdateUser = (data) => {
+  const handleUpdateUser = (userData) => {
     api
-      .setUserInfo(data.name, data.about)
-      .then((newData) => {
-        setCurrentUser(newData.data);
+      .setUserInfo(userData.name, userData.about)
+      .then((res) => {
+        setCurrentUser(res.data || res);
         handleClosePopup();
       })
       .catch(console.error);
   };
 
-  const handleUpdateAvatar = (data) => {
+  const handleUpdateAvatar = (avatarData) => {
     api
-      .setUserAvatar(data.avatar)
-      .then((newData) => {
-        setCurrentUser(newData.data);
+      .updateAvatar(avatarData.avatar)
+      .then((res) => {
+        setCurrentUser(res.data || res);
         handleClosePopup();
       })
       .catch(console.error);
   };
 
-  const handleAddPlaceSubmit = (data) => {
+  const handleAddPlaceSubmit = (cardData) => {
     api
-      .addCard(data.name, data.link)
-      .then((newCard) => {
-        setCards((state) => [newCard, ...state]);
+      .addCard(cardData.name, cardData.link)
+      .then((res) => {
+        const newCard = res.data || res;
+        setCards([newCard, ...cards]);
         handleClosePopup();
       })
       .catch(console.error);
   };
-
   useEffect(() => {
     api
       .getInitialCards()

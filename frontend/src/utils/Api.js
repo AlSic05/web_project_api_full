@@ -12,7 +12,7 @@ class Api {
 
   _checkResponse(res) {
     if (res.ok) {
-      return res.json().then((res) => res.data);
+      return res.json();
     }
     return Promise.reject(`Error: ${res.status}`);
   }
