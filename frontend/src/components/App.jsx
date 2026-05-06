@@ -128,7 +128,18 @@ function App() {
   useEffect(() => {
     api
       .getInitialCards()
-      .then((data) => setCards(data))
+      .then((res) => {
+        const initialCards = res.data || res;
+
+        if (Array.isArray(initialCards)) {
+          setCards(initialCards);
+        } else {
+          console.error(
+            "La respuesta de tarjetas no es un array:",
+            initialCards,
+          );
+        }
+      })
       .catch(console.error);
   }, []);
 
