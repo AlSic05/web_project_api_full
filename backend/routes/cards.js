@@ -1,5 +1,11 @@
 import express from "express";
-import { getCards, createCard, deleteCard } from "../controllers/cards.js";
+import {
+  getCards,
+  createCard,
+  deleteCard,
+  likeCard,
+  dislikeCard,
+} from "../controllers/cards.js";
 import { auth } from "../middlewares/auth.js";
 import { celebrate, Joi } from "celebrate";
 import { validateURL } from "../middlewares/validation.js";
@@ -30,5 +36,9 @@ router.delete(
   }),
   deleteCard,
 );
+
+router.put("/cards/:cardId/likes", auth, likeCard);
+
+router.delete("/cards/:cardId/likes", auth, dislikeCard);
 
 export default router;
